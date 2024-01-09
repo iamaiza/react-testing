@@ -1,24 +1,52 @@
-import logo from "./logo.svg";
 import "./App.css";
+import { useState } from "react";
+import validator from "validator";
 
 function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(email);
+    if (!validator.isEmail(email)) {
+      return setErrorMessage("the email you input is invalid");
+    }
+    else if(password.length < 5 && validator.isEmail(email)) {
+      return setErrorMessage("the password you've entered should contain 5 or more character")
+    }
+  };
+
   return (
     <div className="App">
       <div className="form_container">
         <form>
-          <input 
-            type="email" 
-            placeholder="Email Address"
-           />
           <input
-            type="password" 
-            placeholder="Password" 
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
           />
-          <input 
-            type="password" 
-            placeholder="Confirm Password" 
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          <button>Submit</button>
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {errorMessage && <p>{errorMessage}</p>}
+          <button type="submit" onClick={handleSubmit}>
+            Submit
+          </button>
         </form>
       </div>
     </div>

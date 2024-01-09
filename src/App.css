@@ -19,6 +19,7 @@
   display: block;
   padding: 8px 12px;
   border: none;
+  color: white;
 }
 
 .form_container input {
@@ -29,5 +30,8 @@
 
 .form_container button {
   background-color: rgb(8 47 73);
-  color: white;
+}
+
+p {
+  color: #fff;
 }
