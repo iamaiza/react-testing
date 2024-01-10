@@ -10,12 +10,16 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(email);
     if (!validator.isEmail(email)) {
-      return setErrorMessage("the email you input is invalid");
+      return setErrorMessage("The email you input is invalid");
     }
     else if(password.length < 5 && validator.isEmail(email)) {
-      return setErrorMessage("the password you've entered should contain 5 or more character")
+      return setErrorMessage("The password you've entered should contain 5 or more character")
+    }
+    else if(confirmPassword !== password && confirmPassword.length !== password.length) {
+      return setErrorMessage("The passwords you've entered don't match. Try again")
+    } else {
+      return setErrorMessage("");
     }
   };
 

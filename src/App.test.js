@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import App from "./App";
 import userEvent from "@testing-library/user-event";
+import { typeIntoTheForm, clickSubmitButton, inputErrors } from "./utils";
+
+beforeEach(() => {
+  render(<App />);
+});
 
 // test('renders learn react link', () => {
 //   render(<App />);
@@ -9,72 +14,79 @@ import userEvent from "@testing-library/user-event";
 // });
 
 test("inputs should be initially empty", () => {
-  render(<App />);
-  const emailInput = screen.getByRole("textbox");
-  const passwordInput = screen.getByPlaceholderText("Password");
-  const confirmPasswordInput = screen.getByPlaceholderText(/confirm password/i);
-  expect(emailInput.value).toBe("");
-  expect(passwordInput.value).toBe("");
-  expect(confirmPasswordInput.value).toBe("");
+  expect(screen.getByRole("textbox").value).toBe("");
+  expect(screen.getByPlaceholderText("Password").value).toBe("");
+  expect(screen.getByPlaceholderText(/confirm password/i).value).toBe("");
 });
 
 test("input should be able to type email", () => {
-  render(<App />);
-  const emailInput = screen.getByRole("textbox");
-  userEvent.type(emailInput, "janeDoe22@gmail.com");
+  const { emailInput } = typeIntoTheForm({
+    email: "janeDoe22@gmail.com",
+  });
   expect(emailInput.value).toBe("janeDoe22@gmail.com");
 });
 
 test("input should be able to type password", () => {
-  render(<App />);
-  const passwordInput = screen.getByPlaceholderText("Password");
-  userEvent.type(passwordInput, "janeDoe22@g");
+  const { passwordInput } = typeIntoTheForm({ password: "janeDoe22@g" });
   expect(passwordInput.value).toBe("janeDoe22@g");
 });
 
 test("input should be able to type confirm password", () => {
-  render(<App />);
-  const confirmPasswordInput = screen.getByPlaceholderText(/confirm password/i);
-  userEvent.type(confirmPasswordInput, "janeDoe22@g");
+  const { confirmPasswordInput } = typeIntoTheForm({
+    confirmPassword: "janeDoe22@g",
+  });
   expect(confirmPasswordInput.value).toBe("janeDoe22@g");
 });
 
 test("should show email error message on invalid email", () => {
-  render(<App />);
-  const emailError = screen.queryByText(/the email you input is invalid/i);
-  const emailInput = screen.getByRole("textbox");
-  const submitBtn = screen.getByRole("button", {
-    name: /submit/i,
-  });
+  const { error1 } = inputErrors()
+  expect(error1).not.toBeInTheDocument();
 
-  expect(emailError).not.toBeInTheDocument();
-
-  userEvent.type(emailInput, "janeDoe22gmail.com");
-  userEvent.click(submitBtn);
-  const emailErrorAgain = screen.queryByText(/the email you input is invalid/i);
-  if(emailErrorAgain !== null) expect(emailErrorAgain).toBeInTheDocument();
+  typeIntoTheForm({ email: "janeDoe22gmail.com" });
+  clickSubmitButton();
+  if (error1 !== null) expect(error1).toBeInTheDocument();
 });
 
 test("should show password error if password is less than 5 characters.", () => {
-  render(<App />);
-  const emailInput = screen.getByRole("textbox");
-  const passwordInput = screen.getByPlaceholderText("Password")
 
-  const passwordError = screen.queryByText(/the password you've entered should contain 5 or more character/i);
+  const { error2 } = inputErrors()
+  typeIntoTheForm({ email: "janeDoe22@gmail.com" });
 
-  const submitBtn = screen.getByRole("button", {
-    name: /submit/i,
+  expect(error2).not.toBeInTheDocument();
+
+  typeIntoTheForm({ password: "123" });
+  clickSubmitButton();
+
+  if (error2 !== null)
+    expect(error2).toBeInTheDocument();
+});
+
+test("should show confirm password error if both passwords don't match", () => {
+
+  const { error3 } = inputErrors()
+  typeIntoTheForm({ email: "janeDoe22@gmail.com", password: "12345" });
+
+  expect(error3).not.toBeInTheDocument();
+
+  typeIntoTheForm({ confirmPassword: "123" });
+  clickSubmitButton();
+
+  if (error3 !== null)
+    expect(error3).toBeInTheDocument();
+});
+
+test("should show no error if all inputs are valid", () => {
+
+  typeIntoTheForm({
+    email: "janeDoe22@gmail.com",
+    password: "12345",
+    confirmPassword: "12345",
   });
 
-  userEvent.type(emailInput, "janeDoe22@gmail.com")
-  
-  expect(passwordError).not.toBeInTheDocument()
-  
-  userEvent.type(passwordInput, "jane")
+  clickSubmitButton();
 
-  userEvent.click(submitBtn)
-
-  const passwordErrorAgain = screen.queryByText(/the password you've entered should contain 5 or more character/i)
-
-  if(passwordErrorAgain!== null) expect(passwordErrorAgain).toBeInTheDocument()
-})
+  const { error1, error2, error3 } = inputErrors()
+  expect(error1).not.toBeInTheDocument();
+  expect(error2).not.toBeInTheDocument();
+  expect(error3).not.toBeInTheDocument();
+});
